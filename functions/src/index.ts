@@ -36,6 +36,41 @@ app.post("/api/create", async (req: Request, res: Response) => {
 
 // Read an account by id
 // Get
+app.get("/api/account/:id", async (req: Request, res: Response) => {
+    try {
+        const document = db.collection("accounts").doc(req.params.id);
+        const account = await document.get();
+        const response = account.data();
+
+        return res.status(200).send(response)
+    } catch (error) {
+        return res.status(500).send(error)
+    }
+});
+
+// Read all the accounts
+// Get
+app.get("/api/accounts", async (req: Request, res: Response) => {
+    try {
+        const query = db.collection("accounts");
+        const response: FirebaseFirestore.DocumentData[] = [];
+
+        await query.get().then(snapshot => {
+            const docs = snapshot.docs; // the result of the query
+            docs.forEach(doc => {
+                const eachDoc = {
+                    id: doc.id,
+                    ...doc.data()
+                }
+                response.push(eachDoc);
+            });
+        });
+
+        return res.status(200).send(response)
+    } catch (error) {
+        return res.status(500).send(error)
+    }
+});
 
 // Update
 // Put
