@@ -18,8 +18,23 @@ app.get("/hello-world", (req: Request, res: Response) => {
 
 // Create Account
 // Post
+app.post("/api/create", async (req: Request, res: Response) => {
+    try {
+        await db.collection("accounts").doc().create({
+            username: req.body.username,
+            platform: req.body.platform,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            lastUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdBy: req.body.createdBy || "",
+            realname: req.body.realname || "",
+        });
+        return res.status(200).send("Account created!")
+    } catch (error) {
+        return res.status(500).send(error)
+    }
+});
 
-// Read
+// Read an account by id
 // Get
 
 // Update
