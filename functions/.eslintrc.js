@@ -32,5 +32,6 @@ module.exports = {
     "import/no-unresolved": 0,
     "object-curly-spacing": ["error", "always", { "arraysInObjects": true }],
     "indent": 0,
+    "new-cap": 0,
   },
 };
