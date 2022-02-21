@@ -1,11 +1,13 @@
-import admin from "firebase-admin";
+import * as admin from "firebase-admin";
 const serviceAccount = "./permissions.json";
 
 admin.initializeApp({
+  // service account allows to connect to the database
   credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://instareview.firebaseio.com"
 });
 
-const firestoreDB: FirebaseFirestore.Firestore = admin.firestore();
-firestoreDB.settings({ timestampsInSnapshots: true });
+const db: FirebaseFirestore.Firestore = admin.firestore();
+db.settings({ timestampsInSnapshots: true });
 
-export const db = firestoreDB;
+export { db, admin };
