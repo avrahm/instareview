@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { db } from "./firebase";
+import { db } from "../firebase";
 
 type AccountType = {
     username: string;
