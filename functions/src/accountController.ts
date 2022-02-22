@@ -9,6 +9,7 @@ type AccountType = {
     createdBy: string;
     realname: string;
     overallrating: number;
+    status: number // status: 0 - inactive, 1 - active, 2 - pending, 3 - banned, 4 - claimed
 }
 
 type Request = {
@@ -30,9 +31,10 @@ const createAccount = async (req: Request, res: Response): Promise<unknown> => {
             platform: req.body.platform,
             createdBy: req.user,
             realname: req.body.realname,
-            overallrating: req.body.overallrating,
+            overallrating: 0,
             createdAt: new Date(),
             lastUpdatedAt: new Date(),
+            status: 2 // pending
         }
 
         await query.create(accountObj);
@@ -92,12 +94,14 @@ const getAllAccounts = async (req: Request, res: Response): Promise<unknown> => 
 const updateAccount = async (req: Request, res: Response): Promise<unknown> => {
     try {
         const query = db.collection("accounts").doc(req.params.id);
+        const document = (await query.get()).data();
         const accountObj = {
-            username: req.body.username,
-            platform: req.body.platform,
+            username: req.body.username ? req.body.username : document?.username,
+            platform: req.body.platform ? req.body.platform : document?.platform,
             lastUpdatedAt: new Date(),
-            realname: req.body.realname || "",
-            overallrating: req.body.overallrating || 0,
+            realname: req.body.realname ? req.body.realname : document?.realname,
+            status: req.body.status ? req.body.status : document?.status,
+            lastUpdatedBy: req.user,
         };
 
         await query.update(accountObj)
