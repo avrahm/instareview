@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import * as functions from "firebase-functions";
+import { reviewController } from "./Controllers";
 import { createAccount, getAccountById, getAllAccounts, updateAccount } from "./Controllers/accountController";
 import { addProgram, getAllProgramsByAccount, updateProgram } from "./Controllers/programController";
 import FirebaseAuthToken from "./Middleware/firebaseAuthToken";
@@ -38,6 +39,18 @@ app.put("/api/program", firebaseAuthToken, updateProgram)
 
 // Get all the programs on an account
 app.get("/api/program/:accountId", getAllProgramsByAccount);
+
+// Add a review
+app.post("/api/review", firebaseAuthToken, reviewController.addReview)
+
+// update a review
+app.put("/api/review", firebaseAuthToken, reviewController.updateReview)
+
+// Get all reviews for an account
+app.get("/api/reviews/:accountId", reviewController.getAllReviewsByAccount)
+
+// Get all reviews for a program
+app.get("/api/reviews/:accountId/:programId", reviewController.getAllReviewsByProgram)
 
 // Export the api to Firebase Cloud Functions
 exports.app = functions.https.onRequest(app);
