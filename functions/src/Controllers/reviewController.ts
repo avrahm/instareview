@@ -39,13 +39,13 @@ export const addReview = async (req: Request, res: Response): Promise<unknown> =
         })
     }
     try {
-        if (!docExists("accounts", req.body.accountId)) {
+        if (!await docExists("accounts", req.body.accountId)) {
             return res.status(400).send({
                 status: "error",
                 message: "Account doesn't exist!"
             })
         }
-        if (!programExists(req.body.accountId, req.body.programId)) {
+        if (!await programExists(req.body.accountId, req.body.programId)) {
             return res.status(400).send({
                 status: "error",
                 message: "Program doesn't exist!"
@@ -93,7 +93,7 @@ export const getAllReviewsByAccount = async (req: Request, res: Response): Promi
         })
     }
     try {
-        if (!docExists("accounts", req.params.accountId)) {
+        if (!await docExists("accounts", req.params.accountId)) {
             return res.status(400).send({
                 status: "error",
                 message: "Account doesn't exist!"
@@ -134,13 +134,13 @@ export const getAllReviewsByProgram = async (req: Request, res: Response): Promi
         })
     }
     try {
-        if (!docExists("accounts", req.params.accountId)) {
+        if (!await docExists("accounts", req.params.accountId)) {
             return res.status(400).send({
                 status: "error",
                 message: "Account doesn't exist!"
             })
         }
-        if (!programExists(req.params.accountId, req.params.programId)) {
+        if (!await programExists(req.params.accountId, req.params.programId)) {
             return res.status(400).send({
                 status: "error",
                 message: "Program doesn't exist!"
@@ -172,6 +172,41 @@ export const getAllReviewsByProgram = async (req: Request, res: Response): Promi
     }
 }
 
+// get Reviews by accountId
+export const getAllReviewsByUser = async (req: Request, res: Response): Promise<unknown> => {
+    if (!req.user) {
+        return res.status(400).send({
+            status: "Error",
+            message: "No user logged in!"
+        })
+    }
+    try {
+        const reviewRef = db.collection("reviews");
+        const query = reviewRef.where("createdBy", "==", req.user).get();
+        const response: FirebaseFirestore.DocumentData[] = [];
+        if ((await query).empty) {
+            return res.status(200).send({ "status": "success", "message": "No reviews found!" })
+        }
+        await query.then(snapshot => {
+            const docs = snapshot.docs; // the result of the query
+            docs.forEach(doc => {
+                const eachDoc = {
+                    id: doc.id,
+                    ...doc.data()
+                }
+                response.push(eachDoc);
+            });
+        });
+        return res.status(200).send(response)
+    } catch (error) {
+        let errorMessage = "Unknown error";
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        return res.status(500).send({ errorMessage });
+    }
+}
+
 export const updateReview = async (req: Request, res: Response): Promise<unknown> => {
     if (!req.body.reviewId) {
         return res.status(400).send({
@@ -179,13 +214,13 @@ export const updateReview = async (req: Request, res: Response): Promise<unknown
             message: "Missing reviewId"
         })
     }
+    if (!await docExists("reviews", req.body.reviewId)) {
+        return res.status(400).send({
+            status: "error",
+            message: "Review doesn't exist!"
+        })
+    }
     try {
-        if (!docExists("reviews", req.body.reviewId)) {
-            return res.status(400).send({
-                status: "error",
-                message: "Review doesn't exist!"
-            })
-        }
         const reviewRef = db.collection("reviews").doc(req.body.reviewId);
         const document = (await reviewRef.get()).data();
         const reviewObj = {

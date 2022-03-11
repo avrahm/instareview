@@ -52,5 +52,8 @@ app.get("/api/reviews/:accountId", reviewController.getAllReviewsByAccount)
 // Get all reviews for a program
 app.get("/api/reviews/:accountId/:programId", reviewController.getAllReviewsByProgram)
 
+// Get all review by user
+app.get("/api/user/reviews", firebaseAuthToken, reviewController.getAllReviewsByUser)
+
 // Export the api to Firebase Cloud Functions
 exports.app = functions.https.onRequest(app);
